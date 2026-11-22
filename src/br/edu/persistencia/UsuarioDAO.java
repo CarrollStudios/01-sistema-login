@@ -1,3 +1,4 @@
+
 package br.edu.persistencia;
 
 import java.io.*;
@@ -32,7 +33,15 @@ public class UsuarioDAO {
     }
 
     public boolean cadastrar(Usuario usuario) throws IOException {
-        if (usuarioExiste(usuario.getUsuario())) {
+
+        String nome = usuario.getUsuario().trim();
+        String senha = usuario.getSenha().trim();
+
+        if (nome.isEmpty() || senha.isEmpty()) {
+            return false;
+        }
+
+        if (usuarioExiste(nome)) {
             return false;
         }
 
@@ -41,7 +50,7 @@ public class UsuarioDAO {
                 StandardCharsets.UTF_8,
                 StandardOpenOption.APPEND)) {
 
-            escritor.write(usuario.getUsuario() + ";" + usuario.getSenha());
+            escritor.write(nome + ";" + senha);
             escritor.newLine();
         }
 
@@ -49,6 +58,14 @@ public class UsuarioDAO {
     }
 
     public boolean autenticar(String nome, String senha) throws IOException {
+
+        nome = nome.trim();
+        senha = senha.trim();
+
+        if (nome.isEmpty() || senha.isEmpty()) {
+            return false;
+        }
+
         try (BufferedReader leitor = Files.newBufferedReader(
                 Paths.get(arquivo), StandardCharsets.UTF_8)) {
 
@@ -69,6 +86,7 @@ public class UsuarioDAO {
     }
 
     private boolean usuarioExiste(String nome) throws IOException {
+
         try (BufferedReader leitor = Files.newBufferedReader(
                 Paths.get(arquivo), StandardCharsets.UTF_8)) {
 
