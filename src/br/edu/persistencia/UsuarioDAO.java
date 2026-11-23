@@ -17,14 +17,18 @@ public class UsuarioDAO {
     private final String arquivo = "usuarios.txt";
 
     public UsuarioDAO() {
+
         inicializarArquivo();
     }
 
     private void inicializarArquivo() {
+
         Path caminho = Paths.get(arquivo);
 
         try {
+
             if (Files.notExists(caminho)) {
+
                 String salt = HashSenha.gerarSalt();
                 String hash = HashSenha.gerarHash("toor", salt);
 
@@ -34,8 +38,10 @@ public class UsuarioDAO {
                     StandardCharsets.UTF_8
                 );
             }
+
         } catch (IOException | NoSuchAlgorithmException
                 | InvalidKeySpecException e) {
+
             throw new RuntimeException("Erro ao inicializar os usuários.", e);
         }
     }
@@ -43,18 +49,22 @@ public class UsuarioDAO {
     public boolean cadastrar(Usuario usuario) throws IOException {
 
         String nome = usuario.getUsuario().trim();
-        String senha = usuario.getSenha().trim();
+        String senha = usuario.getSenha();
 
-        if (nome.isEmpty() || senha.isEmpty()
+        if (nome.isEmpty() || senha.trim().isEmpty()
+                || senha.length() != 8
                 || nome.contains(";") || senha.contains(";")) {
+
             return false;
         }
 
         if (usuarioExiste(nome)) {
+
             return false;
         }
 
         try {
+
             String salt = HashSenha.gerarSalt();
             String hash = HashSenha.gerarHash(senha, salt);
 
@@ -70,6 +80,7 @@ public class UsuarioDAO {
             return true;
 
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+
             throw new IOException("Erro ao proteger a senha.", e);
         }
     }
@@ -77,9 +88,9 @@ public class UsuarioDAO {
     public boolean autenticar(String nome, String senha) throws IOException {
 
         nome = nome.trim();
-        senha = senha.trim();
 
-        if (nome.isEmpty() || senha.isEmpty()) {
+        if (nome.isEmpty() || senha.length() != 8) {
+
             return false;
         }
 
@@ -95,6 +106,7 @@ public class UsuarioDAO {
                 if (dados[1].equals(senha)) {
 
                     try {
+
                         String salt = HashSenha.gerarSalt();
                         String hash = HashSenha.gerarHash(senha, salt);
 
@@ -110,6 +122,7 @@ public class UsuarioDAO {
 
                     } catch (NoSuchAlgorithmException
                             | InvalidKeySpecException e) {
+
                         throw new IOException("Erro ao atualizar a senha.", e);
                     }
                 }
@@ -120,11 +133,13 @@ public class UsuarioDAO {
             if (dados.length == 3 && dados[0].equals(nome)) {
 
                 try {
+
                     return HashSenha.verificarSenha(
                             senha, dados[1], dados[2]);
 
                 } catch (NoSuchAlgorithmException
                         | InvalidKeySpecException e) {
+
                     throw new IOException("Erro ao verificar a senha.", e);
                 }
             }
@@ -145,6 +160,7 @@ public class UsuarioDAO {
                 String[] dados = linha.split(";", 3);
 
                 if (dados.length >= 2 && dados[0].equals(nome)) {
+
                     return true;
                 }
             }

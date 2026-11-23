@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.swing.*;
 
 import br.edu.persistencia.UsuarioDAO;
+import br.edu.modelo.Usuario;
 
 public class TelaLoginTeste extends JFrame {
 
@@ -19,7 +20,7 @@ public class TelaLoginTeste extends JFrame {
         dao = new UsuarioDAO();
 
         setTitle("Sistema de Login");
-        setSize(320, 230);
+        setSize(350, 270);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -43,6 +44,7 @@ public class TelaLoginTeste extends JFrame {
         gbc.gridwidth = 1;
 
         JLabel labelUsuario = new JLabel("Usuário");
+        gbc.gridx = 0;
         gbc.gridy = 1;
         painel.add(labelUsuario, gbc);
 
@@ -63,10 +65,17 @@ public class TelaLoginTeste extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
-        gbc.insets = new Insets(15, 0, 0, 0);
+        gbc.insets = new Insets(12, 0, 5, 0);
         painel.add(botaoEntrar, gbc);
 
+        JButton botaoCadastrar = new JButton("Cadastrar");
+        gbc.gridy = 4;
+        gbc.insets = new Insets(5, 0, 0, 0);
+        painel.add(botaoCadastrar, gbc);
+
         botaoEntrar.addActionListener(e -> realizarLogin());
+
+        botaoCadastrar.addActionListener(e -> abrirCadastro());
 
         add(painel);
     }
@@ -75,6 +84,16 @@ public class TelaLoginTeste extends JFrame {
 
         String usuario = campoUsuario.getText();
         String senha = new String(campoSenha.getPassword());
+
+        if (senha.length() != 8) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "A senha deve ter exatamente 8 caracteres."
+            );
+
+            return;
+        }
 
         try {
 
@@ -98,6 +117,100 @@ public class TelaLoginTeste extends JFrame {
             JOptionPane.showMessageDialog(
                     this,
                     "Erro ao realizar login: " + e.getMessage()
+            );
+        }
+    }
+
+    private void abrirCadastro() {
+
+        JTextField novoUsuario = new JTextField(15);
+        JPasswordField novaSenha = new JPasswordField(15);
+        JPasswordField confirmarSenha = new JPasswordField(15);
+
+        JPanel painelCadastro = new JPanel(new GridLayout(3, 2, 8, 8));
+
+        painelCadastro.add(new JLabel("Novo usuário:"));
+        painelCadastro.add(novoUsuario);
+
+        painelCadastro.add(new JLabel("Senha:"));
+        painelCadastro.add(novaSenha);
+
+        painelCadastro.add(new JLabel("Confirmar senha:"));
+        painelCadastro.add(confirmarSenha);
+
+        int opcao = JOptionPane.showConfirmDialog(
+                this,
+                painelCadastro,
+                "Cadastrar novo usuário",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (opcao != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        String usuario = novoUsuario.getText();
+        String senha = new String(novaSenha.getPassword());
+        String confirmacao = new String(confirmarSenha.getPassword());
+
+        if (usuario.trim().isEmpty()) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe um nome de usuário."
+            );
+
+            return;
+        }
+
+        if (senha.length() != 8) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "A senha deve ter exatamente 8 caracteres."
+            );
+
+            return;
+        }
+
+        if (!senha.equals(confirmacao)) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "As senhas não coincidem."
+            );
+
+            return;
+        }
+
+        try {
+
+            Usuario novo = new Usuario(usuario, senha);
+
+            if (dao.cadastrar(novo)) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Usuário cadastrado com sucesso!"
+                );
+
+                campoUsuario.setText(usuario);
+                campoSenha.setText("");
+
+            } else {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Não foi possível cadastrar. Verifique os dados ou se o usuário já existe."
+                );
+            }
+
+        } catch (IOException e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao cadastrar usuário: " + e.getMessage()
             );
         }
     }
