@@ -1,12 +1,16 @@
 
 package br.edu.persistencia;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Collections;
 import java.util.List;
 
 import br.edu.modelo.Usuario;
@@ -17,7 +21,6 @@ public class UsuarioDAO {
     private final String arquivo = "usuarios.txt";
 
     public UsuarioDAO() {
-
         inicializarArquivo();
     }
 
@@ -26,23 +29,13 @@ public class UsuarioDAO {
         Path caminho = Paths.get(arquivo);
 
         try {
-
             if (Files.notExists(caminho)) {
-
-                String salt = HashSenha.gerarSalt();
-                String hash = HashSenha.gerarHash("toor", salt);
-
-                Files.write(
-                    caminho,
-                    Collections.singletonList("root;" + salt + ";" + hash),
-                    StandardCharsets.UTF_8
-                );
+                Files.createFile(caminho);
             }
-
-        } catch (IOException | NoSuchAlgorithmException
-                | InvalidKeySpecException e) {
-
-            throw new RuntimeException("Erro ao inicializar os usuários.", e);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Erro ao inicializar os usuários.", e
+            );
         }
     }
 
@@ -51,15 +44,20 @@ public class UsuarioDAO {
         String nome = usuario.getUsuario().trim();
         String senha = usuario.getSenha();
 
-        if (nome.isEmpty() || senha.trim().isEmpty()
+        if (nome.length() < 4 || nome.length() > 6
+                || senha.trim().isEmpty()
                 || senha.length() != 8
-                || nome.contains(";") || senha.contains(";")) {
+                || nome.contains(";")
+                || nome.contains("\n")
+                || nome.contains("\r")
+                || senha.contains(";")
+                || senha.contains("\n")
+                || senha.contains("\r")) {
 
             return false;
         }
 
         if (usuarioExiste(nome)) {
-
             return false;
         }
 
@@ -79,68 +77,52 @@ public class UsuarioDAO {
 
             return true;
 
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+        } catch (NoSuchAlgorithmException
+                | InvalidKeySpecException e) {
 
-            throw new IOException("Erro ao proteger a senha.", e);
+            throw new IOException(
+                    "Erro ao proteger a senha.", e
+            );
         }
     }
 
-    public boolean autenticar(String nome, String senha) throws IOException {
+    public boolean autenticar(String nome, String senha)
+            throws IOException {
 
         nome = nome.trim();
 
-        if (nome.isEmpty() || senha.length() != 8) {
+        if (nome.length() < 4 || nome.length() > 6
+                || senha.isEmpty()
+                || senha.length() != 8) {
 
             return false;
         }
 
         List<String> linhas = Files.readAllLines(
-                Paths.get(arquivo), StandardCharsets.UTF_8);
+                Paths.get(arquivo),
+                StandardCharsets.UTF_8
+        );
 
-        for (int i = 0; i < linhas.size(); i++) {
+        for (String linha : linhas) {
 
-            String[] dados = linhas.get(i).split(";", 3);
-
-            if (dados.length == 2 && dados[0].equals(nome)) {
-
-                if (dados[1].equals(senha)) {
-
-                    try {
-
-                        String salt = HashSenha.gerarSalt();
-                        String hash = HashSenha.gerarHash(senha, salt);
-
-                        linhas.set(i, nome + ";" + salt + ";" + hash);
-
-                        Files.write(
-                            Paths.get(arquivo),
-                            linhas,
-                            StandardCharsets.UTF_8
-                        );
-
-                        return true;
-
-                    } catch (NoSuchAlgorithmException
-                            | InvalidKeySpecException e) {
-
-                        throw new IOException("Erro ao atualizar a senha.", e);
-                    }
-                }
-
-                return false;
-            }
+            String[] dados = linha.split(";", 3);
 
             if (dados.length == 3 && dados[0].equals(nome)) {
 
                 try {
 
                     return HashSenha.verificarSenha(
-                            senha, dados[1], dados[2]);
+                            senha,
+                            dados[1],
+                            dados[2]
+                    );
 
                 } catch (NoSuchAlgorithmException
                         | InvalidKeySpecException e) {
 
-                    throw new IOException("Erro ao verificar a senha.", e);
+                    throw new IOException(
+                            "Erro ao verificar a senha.", e
+                    );
                 }
             }
         }
@@ -151,7 +133,8 @@ public class UsuarioDAO {
     private boolean usuarioExiste(String nome) throws IOException {
 
         try (BufferedReader leitor = Files.newBufferedReader(
-                Paths.get(arquivo), StandardCharsets.UTF_8)) {
+                Paths.get(arquivo),
+                StandardCharsets.UTF_8)) {
 
             String linha;
 
@@ -159,8 +142,7 @@ public class UsuarioDAO {
 
                 String[] dados = linha.split(";", 3);
 
-                if (dados.length >= 2 && dados[0].equals(nome)) {
-
+                if (dados.length == 3 && dados[0].equals(nome)) {
                     return true;
                 }
             }

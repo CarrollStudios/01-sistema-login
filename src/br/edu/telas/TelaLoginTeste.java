@@ -74,7 +74,6 @@ public class TelaLoginTeste extends JFrame {
         painel.add(botaoCadastrar, gbc);
 
         botaoEntrar.addActionListener(e -> realizarLogin());
-
         botaoCadastrar.addActionListener(e -> abrirCadastro());
 
         add(painel);
@@ -82,16 +81,38 @@ public class TelaLoginTeste extends JFrame {
 
     private void realizarLogin() {
 
-        String usuario = campoUsuario.getText();
+        String usuario = campoUsuario.getText().trim();
         String senha = new String(campoSenha.getPassword());
 
-        if (senha.length() != 8) {
+        if (usuario.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe o nome de usuário."
+            );
+            return;
+        }
 
+        if (usuario.length() < 4 || usuario.length() > 6) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "O nome de usuário deve ter entre 4 e 6 caracteres."
+            );
+            return;
+        }
+
+        if (senha.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe a senha."
+            );
+            return;
+        }
+
+        if (senha.length() != 8) {
             JOptionPane.showMessageDialog(
                     this,
                     "A senha deve ter exatamente 8 caracteres."
             );
-
             return;
         }
 
@@ -150,37 +171,47 @@ public class TelaLoginTeste extends JFrame {
             return;
         }
 
-        String usuario = novoUsuario.getText();
+        String usuario = novoUsuario.getText().trim();
         String senha = new String(novaSenha.getPassword());
         String confirmacao = new String(confirmarSenha.getPassword());
 
-        if (usuario.trim().isEmpty()) {
-
+        if (usuario.isEmpty()) {
             JOptionPane.showMessageDialog(
                     this,
                     "Informe um nome de usuário."
             );
+            return;
+        }
 
+        if (usuario.length() < 4 || usuario.length() > 6) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "O nome de usuário deve ter entre 4 e 6 caracteres."
+            );
+            return;
+        }
+
+        if (senha.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Informe uma senha."
+            );
             return;
         }
 
         if (senha.length() != 8) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "A senha deve ter exatamente 8 caracteres."
             );
-
             return;
         }
 
         if (!senha.equals(confirmacao)) {
-
             JOptionPane.showMessageDialog(
                     this,
                     "As senhas não coincidem."
             );
-
             return;
         }
 
