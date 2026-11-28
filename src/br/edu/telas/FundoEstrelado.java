@@ -47,9 +47,15 @@ public class FundoEstrelado extends JPanel {
 
         g2.setFont(Estilo.fonteTexto(11));
         g2.setColor(new Color(0x4F4880));
-        String assinatura = "✦  C A R R O L L   S T U D I O S  ✦";
+        String assinatura = "C A R R O L L   S T U D I O S";
         int largura = g2.getFontMetrics().stringWidth(assinatura);
-        g2.drawString(assinatura, (getWidth() - largura) / 2, getHeight() - 18);
+        int x = (getWidth() - largura) / 2;
+        int y = getHeight() - 18;
+        g2.drawString(assinatura, x, y);
+        // Estrelinhas dos dois lados (desenhadas, para não virar quadrado no Windows)
+        Color corAssinatura = new Color(0x4F4880);
+        Estilo.desenharEstrela(g2, x - 12, y - 4, 4, corAssinatura);
+        Estilo.desenharEstrela(g2, x + largura + 12, y - 4, 4, corAssinatura);
         g2.dispose();
     }
 }

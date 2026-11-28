@@ -139,18 +139,21 @@ public class TelaLogin extends JFrame {
         // }
         JOptionPane.showMessageDialog(this,
                 "Os dados seguem as regras! A conferência no usuarios.txt\n"
-                + "entra quando as classes da Hadassa chegarem na main.");
+                + "entra quando as classes da Hadassa chegarem na main.\n"
+                + "Por enquanto, a Tela de Seleção abre para teste.");
+        new TelaSelecao(usuario).setVisible(true); // provisório, para testar o caminho entre as telas
+        dispose();
     }
 
     // Chamado quando a pessoa clica em "cadastre-se".
     private void abrirCadastro() {
-        // Depois: new TelaCadastro().setVisible(true); e dispose();
-        JOptionPane.showMessageDialog(this, "A Tela de Cadastro vem em um próximo passo.");
+        new TelaCadastro().setVisible(true);
+        dispose(); // fecha a tela de login
     }
 
     // Mostra a caixa roxa com a mensagem de erro.
     private void mostrarAviso(String mensagem) {
-        aviso.setText("✦  " + mensagem);
+        aviso.setText(mensagem);
         aviso.setVisible(true);
     }
 

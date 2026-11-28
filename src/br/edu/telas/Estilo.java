@@ -55,6 +55,46 @@ public class Estilo {
         return new ImageIcon(original.getScaledInstance(largura, altura, Image.SCALE_SMOOTH));
     }
 
+    // ===== Estrelinha ✦ =====
+    // Desenhada com código, porque algumas letras do Windows não têm o símbolo ✦
+    // (no lugar dele aparecia um quadrado).
+
+    /** Desenha uma estrelinha de 4 pontas com centro em (cx, cy) e "raio" r. */
+    public static void desenharEstrela(Graphics2D g2, double cx, double cy, double r, Color cor) {
+        double m = r * 0.28; // largura da "cintura" da estrela
+        java.awt.geom.Path2D estrela = new java.awt.geom.Path2D.Double();
+        estrela.moveTo(cx, cy - r);
+        estrela.quadTo(cx + m, cy - m, cx + r, cy);
+        estrela.quadTo(cx + m, cy + m, cx, cy + r);
+        estrela.quadTo(cx - m, cy + m, cx - r, cy);
+        estrela.quadTo(cx - m, cy - m, cx, cy - r);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(cor);
+        g2.fill(estrela);
+    }
+
+    /** A estrelinha como ícone, para colocar ao lado de um texto (JLabel). */
+    public static Icon estrela(int tamanho, Color cor) {
+        return new Icon() {
+            @Override
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                desenharEstrela(g2, x + tamanho / 2.0, y + tamanho / 2.0, tamanho / 2.0, cor);
+                g2.dispose();
+            }
+
+            @Override
+            public int getIconWidth() {
+                return tamanho;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return tamanho;
+            }
+        };
+    }
+
     // ===== Componentes =====
 
     /** Título grande (ex.: "boas-vindas!"). */
@@ -134,6 +174,8 @@ public class Estilo {
         };
         aviso.setFont(fonteTexto(13));
         aviso.setForeground(new Color(0xE9D5FF));
+        aviso.setIcon(estrela(10, ROXO_CLARO)); // estrelinha antes da mensagem
+        aviso.setIconTextGap(8);
         aviso.setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 12));
         aviso.setVisible(false);
         return aviso;
